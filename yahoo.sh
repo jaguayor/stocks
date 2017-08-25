@@ -1,22 +1,24 @@
 #! /bin/bash
 
-rm -rf "temp.csv"
-curl -o temp.csv "http://real-chart.finance.yahoo.com/table.csv?a=02&b=13&c=1986&d=01&e=26&f=2015&g=m&ignore=.csv&s=SPY"
-awk -F"," 'BEGIN { OFS = "," } {$1="'SPY', "$1; print}' temp.csv >> yahoo.csv
+rm -rf "yahoo.csv"
+rm -rf "SPY.csv"
+python get-yahoo-quotes.py SPY
+awk -F"," 'BEGIN { OFS = "," } {$1="'SPY', "$1; print}' SPY.csv >> yahoo.csv
+rm -rf "SPY.csv"
 
 
-  FILE="sp500.csv"
+  FILE="stocks.csv"
 
   exec 0<"$FILE"
   n=0
   while read -r symbol
   do
     echo "${symbol}"
-    rm -rf "temp.csv"
-    curl -o temp.csv "http://real-chart.finance.yahoo.com/table.csv?a=02&b=13&c=1986&d=01&e=26&f=2015&g=m&ignore=.csv&s=${symbol}"
-sed '1d' -i temp.csv
-awk -F"," 'BEGIN { OFS = "," } {$1="'$symbol', "$1; print}' temp.csv >> yahoo.csv
+    rm -rf "{symbol}.csv"
+python get-yahoo-quotes.py $symbol
+sed '1d' -i $symbol.csv
+awk -F"," 'BEGIN { OFS = "," } {$1="'$symbol', "$1; print}' $symbol.csv >> yahoo.csv
 echo 'BEGIN { OFS = "," } {$1='$symbol'", "$1; print}'
 
-   rm -rf temp.csv
+   rm -rf "${symbol}.csv"
   done
